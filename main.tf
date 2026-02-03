@@ -1,18 +1,18 @@
-# Getting the cidr block of the default az ap-south-1a
-data "aws_subnet" "ap-south-1a" {
+# Getting the cidr block of the default az az-of-region
+data "aws_subnet" "az-of-region" {
   id = var.subnet-id
 }
 
 module "vpc" {
   source     = "./VPC"
-  name       = "custom-vpc"
-  cidr-block = "10.0.0.0/16"
+  name       = var.vpc-config.name
+  cidr-block = var.vpc-config.cidr-block
 }
 
 module "subnet" {
   source     = "./SUBNETS"
   vpc-id     = module.vpc.custom-vpc-id
-  cidr-block = "10.0.1.0/24"
+  cidr-block = var.subnet-cidr-block
   depends_on = [module.vpc]
 }
 
@@ -20,9 +20,9 @@ module "network-acl" {
   source     = "./Network-ACL"
   vpc-id     = module.vpc.custom-vpc-id
   subnet-id  = module.subnet.subnet-id
-  cidr-block = data.aws_subnet.ap-south-1a.cidr_block # by declaring these line motive is that only connection from default-vpc az1 will connect to custom-vpc.
+  cidr-block = data.aws_subnet.az-of-region.cidr_block # by declaring these line motive is that only connection from default-vpc az1 will connect to custom-vpc.
   #cidr-block-all = "0.0.0.0/0"                         # remember to uncomment from Network-ACL main and variable, all traffic will be allowed in custom-vpc
-  depends_on = [module.vpc, module.subnet, data.aws_subnet.ap-south-1a]
+  depends_on = [module.vpc, module.subnet, data.aws_subnet.az-of-region]
 }
 
 module "IG" {
@@ -36,15 +36,15 @@ module "RouteTable" {
   vpc-id                = module.vpc.custom-vpc-id
   subnet-id             = module.subnet.subnet-id
   gateway-id            = module.IG.internet-gateway
-  cidr-block            = data.aws_subnet.ap-south-1a.cidr_block
+  cidr-block            = data.aws_subnet.az-of-region.cidr_block
   peering-connection-id = aws_vpc_peering_connection.default-connect-custom.id
 }
 
 module "custom-EC2" {
   source        = "./CUSTOM-EC2"
   vpc-id        = module.vpc.custom-vpc-id
-  ami           = "ami-00ca570c1b6d79f36"
-  instance-type = "t3.micro"
+  ami           = var.custom-EC2-config.ami
+  instance-type = var.custom-EC2-config.instance-type
   key-name      = var.key-name
   subnet-id     = module.subnet.subnet-id
   depends_on    = [module.vpc]
@@ -54,21 +54,21 @@ module "default-EC2" {
   source = "./default-EC2"
   # privatekey = var.privatekey
   default-server-config = {
-    ami               = "ami-00ca570c1b6d79f36"
-    instance_type     = "t3.micro"
+    ami               = var.default-EC2-config.ami
+    instance_type     = var.default-EC2-config.instance_type
     key_name          = var.key-name
-    availability_zone = "ap-south-1a"
+    availability_zone = var.default-EC2-config.availability_zone
   }
 }
 
-# Adding route table entry for subnet of ap-south-1a to point to peering connection.
+# Adding route table entry for subnet of az-of-region to point to peering connection.
 
-data "aws_route_table" "ap-south-1a-route-table" {
+data "aws_route_table" "az-of-region-route-table" {
   subnet_id = var.subnet-id
 }
 
 resource "aws_route" "route" {
-  route_table_id            = data.aws_route_table.ap-south-1a-route-table.id
+  route_table_id            = data.aws_route_table.az-of-region-route-table.id
   destination_cidr_block    = module.subnet.custom-subnet-cidr-block
   vpc_peering_connection_id = aws_vpc_peering_connection.default-connect-custom.id
   depends_on                = [aws_vpc_peering_connection.default-connect-custom, module.subnet]

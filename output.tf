@@ -3,14 +3,14 @@ output "default-connect-custom-status" {
 }
 
 output "AZ1-cidr-block" {
-  value = data.aws_subnet.ap-south-1a.cidr_block
+  value = data.aws_subnet.az-of-region.cidr_block
 }
 
 output "custom-EC2-private-ip" {
   value = module.custom-EC2.custom-EC2-ip
 }
 
-output "default-EC2-ip" {
+output "default-EC2-public-ip" {
   value = module.default-EC2.default-EC2-ip
 }
 

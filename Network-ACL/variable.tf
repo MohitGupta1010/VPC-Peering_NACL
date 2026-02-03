@@ -11,7 +11,7 @@ variable "cidr-block" {
 }
 
 # variable "cidr-block-all" {
-#   description = "When nothing works set the things on fire, allowed all subnet to communicate with custom-vpc subnet if vpc peering is acheived in between both"
+#   description = "allowed all subnet to communicate with custom-vpc subnet if vpc peering is acheived in between both"
 #   type = string
 # }
 
