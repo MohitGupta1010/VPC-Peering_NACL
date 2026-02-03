@@ -61,10 +61,10 @@ module "default-EC2" {
   }
 }
 
-# Adding route table entry for subnet of az-of-region to point to peering connection.
+# Adding route table entry for subnet of az-of-region to point to peering connection in default vpc.
 
 data "aws_route_table" "az-of-region-route-table" {
-  subnet_id = var.subnet-id
+  vpc_id = data.aws_vpc.default.id
 }
 
 resource "aws_route" "route" {
