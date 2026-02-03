@@ -2,6 +2,11 @@
 #   type = string
 # }
 
+var "region" {
+  type = string
+  default = "ap-south-1"
+}
+
 variable "subnet-id" {
   type        = string
   default     = "subnet-0b1e1c74e9f3feb70"
