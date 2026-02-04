@@ -38,7 +38,7 @@ aws configure
 Clone the project
 ```
 git clone "https://github.com/MohitGupta1010/VPC-Peering_NACL.git"
-cd VPC-Peering_NACL
+cd VPC-Peering_NACL/
 ```
 Initiliaze the terraform
 ```
