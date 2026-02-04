@@ -37,6 +37,7 @@ module "RouteTable" {
   subnet-id             = module.subnet.subnet-id
   gateway-id            = module.IG.internet-gateway
   cidr-block            = data.aws_subnet.az-of-region.cidr_block
+  cidr-block-vpc        = module.vpc.custom-vpc-cidr-block
   peering-connection-id = aws_vpc_peering_connection.default-connect-custom.id
 }
 

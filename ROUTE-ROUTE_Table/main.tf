@@ -2,7 +2,7 @@ resource "aws_route_table" "custom-route" {
   vpc_id = var.vpc-id
 
   route {
-    cidr_block = "10.0.0.0/16"
+    cidr_block = var.cidr-block-vpc
     gateway_id = "local"
   }
   route {
